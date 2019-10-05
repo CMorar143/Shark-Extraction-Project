@@ -18,5 +18,7 @@ V = YUV[:,:,2]
 # Showing each image on the screen in a different window (OpenCV):
 cv2.imshow("Original", I)
 cv2.imshow("Y", Y)
-
 key = cv2.waitKey(0)
+
+# Gives error as it is expecting a cv2.CLAHE object
+E = cv2.CLAHE.apply(Y)
