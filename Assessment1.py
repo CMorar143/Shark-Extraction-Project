@@ -20,14 +20,21 @@ V = YUV[:,:,2]
 # cv2.imshow("Y", Y)
 # key = cv2.waitKey(0)
 
-# Enchance contrast for the luminance (Y) channel in the image
-# This is done using the Contrast Limited Adaptive Histogram Equalization class
-# Create the CLAHE object and the set the clip limit and tile grid size
+# Using the Contrast Limited Adaptive Histogram Equalization class to enhance the contrast
+# Create the CLAHE object and the set the clip limit and tile grid size:
 CLAHE = cv2.createCLAHE()
 CLAHE.setClipLimit(4.5)
 CLAHE.setTilesGridSize((10, 10))
 
+# Enchance contrast for the luminance (Y) channel in the image
 E = CLAHE.apply(Y)
 
-cv2.imshow("Enchanced Image", E)
+# Instead of showing a greyscale image of the luminance alone, merge the enhanced 
+# luminance with the original U and V values to form a full YUV image
+Enchanced_YUV = cv2.merge((E,U,V))
+
+# Convert the new YUV image back to the original BGR colour space
+Enchanced_BGR = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
+
+cv2.imshow("Enchanced Image", Enchanced_BGR)
 key = cv2.waitKey(0)
