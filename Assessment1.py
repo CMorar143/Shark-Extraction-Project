@@ -14,17 +14,14 @@ Y = YUV[:,:,0]
 U = YUV[:,:,1]
 V = YUV[:,:,2]
 
-
 # Showing each image on the screen in a different window (OpenCV):
 # cv2.imshow("Original", I)
 # cv2.imshow("Y", Y)
 # key = cv2.waitKey(0)
 
 # Using the Contrast Limited Adaptive Histogram Equalization class to enhance the contrast
-# Create the CLAHE object and the set the clip limit and tile grid size:
-CLAHE = cv2.createCLAHE()
-CLAHE.setClipLimit(4.5)
-CLAHE.setTilesGridSize((10, 10))
+# Create the CLAHE object and set the clip limit and tile grid size:
+CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (6,6))
 
 # Enchance contrast for the luminance (Y) channel in the image
 E = CLAHE.apply(Y)
