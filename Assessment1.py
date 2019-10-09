@@ -14,8 +14,8 @@ from matplotlib import image as image
 I = cv2.imread("Shark_1.PNG")
 
 h, w, d = I.shape
-blue_image = I.copy()
-blue_image[:,:] = (255,0,0)
+# blue_image = I.copy()
+# blue_image[:,:] = (255,0,0)
 
 
 # Converting the colour space to YUV and extracting the Luminance (Y) From the image:
@@ -42,27 +42,36 @@ CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (2,2))
 
 # Enchance contrast for the luminance (Y) channel in the image
 YE = CLAHE.apply(Y)
-E = CLAHE.apply(HV)
-# cv2.imshow("enhanced Y channel", E)
+HVE = CLAHE.apply(HV)
+
+# YE1 = cv2.fastNlMeansDenoising(YE,None,5,7,21)
+# HVE1 = cv2.fastNlMeansDenoising(HVE,None,3,7,21)
 
 # Instead of showing a greyscale image of the luminance alone, merge the enhanced 
 # luminance with the original U and V values to form a full YUV image
 Enchanced_YUV = cv2.merge((YE,U,V))
-Enchanced_HSV = cv2.merge((H,S,E))
+# Enchanced_HSV = cv2.merge((H,S,HVE1))
 
 # Convert the new YUV image back to the original BGR colour space
 Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
-Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
+# Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
+
+# finalhsv = cv2.fastNlMeansDenoisingColored(Enchanced_BGR_HSV,None,20,10,7,20)
+# finalyuv = cv2.fastNlMeansDenoisingColored(Enchanced_BGR_YUV,None,20,10,7,20)
+
+# Equalised_HVE = cv2.equalizeHist(HVE)
+# Equalised_YE = cv2.equalizeHist(YE)
 
 # BG = Enchanced_BGR[:,:,0]
 
 cv2.imshow("Enchanced ImageY", Enchanced_BGR_YUV)
-cv2.imshow("Enchanced ImageH", Enchanced_BGR_HSV)
+# cv2.imshow("Enchanced ImageH", Enchanced_BGR_HSV)
 # cv2.imshow("BG", BG)
 # cv2.imshow("Y", Y)
 # cv2.imshow("E", E)
 # cv2.imshow("U", U)
-
+# cv2.imshow("finalhsv", finalhsv)
+# cv2.imshow("finalyuv", finalyuv)
 # cv2.imshow("HV", HV)
 
 key = cv2.waitKey(0)
@@ -74,25 +83,31 @@ key = cv2.waitKey(0)
 
 
 # fig = plt.figure()
-# gs = fig.add_gridspec(1, 2)
+# gs = fig.add_gridspec(4, 2)
 
 # ax1 = fig.add_subplot(gs[0,0])
-# ax1.imshow(BG, cmap='gray')
+# ax1.imshow(YE, cmap='gray')
 
 # ax2 = fig.add_subplot(gs[0,1])
-# ax2.hist(BG.ravel(), bins=256, range=[0,256])
+# ax2.hist(YE.ravel(), bins=256, range=[0,256])
 
 # ax3 = fig.add_subplot(gs[1,0])
-# ax3.imshow(U, cmap='gray')
+# ax3.imshow(HVE, cmap='gray')
 
 # ax4 = fig.add_subplot(gs[1,1])
-# ax4.hist(U.ravel(), bins=256, range=[0,256])
+# ax4.hist(HVE.ravel(), bins=256, range=[0,256])
 
-# ax5 = fig.add_subplot(gs[2,0])
-# ax5.imshow(V, cmap='gray')
+# # ax5 = fig.add_subplot(gs[2,0])
+# # ax5.imshow(Enchanced_BGR_YUV, cmap='gray')
 
-# ax6 = fig.add_subplot(gs[2,1])
-# ax6.hist(V.ravel(), bins=256, range=[0,256])
+# # ax6 = fig.add_subplot(gs[2,1])
+# # ax6.hist(Enchanced_BGR_YUV.ravel(), bins=256, range=[0,256])
+
+# # ax7 = fig.add_subplot(gs[3,0])
+# # ax7.imshow(Enchanced_BGR_HSV, cmap='gray')
+
+# # ax8 = fig.add_subplot(gs[3,1])
+# # ax8.hist(Enchanced_BGR_HSV.ravel(), bins=256, range=[0,256])
 
 # plt.show()
 # cv2.waitKey(0)
