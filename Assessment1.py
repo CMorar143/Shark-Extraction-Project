@@ -39,11 +39,19 @@ HV = HSV[:,:,2]
 CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (3,3))
 
 # Enchance contrast for the luminance (Y) channel in the image
+
 YE = CLAHE.apply(Y)
 HVE = CLAHE.apply(HV)
+# HVE = cv2.equalizeHist(HV) 
 
-# YE1 = cv2.fastNlMeansDenoising(YE,None,5,7,21)
-# HVE1 = cv2.fastNlMeansDenoising(HVE,None,3,7,21)
+_, th1 = cv2.threshold(HVE, 170, 255, cv2.THRESH_TRUNC)
+th3 = cv2.equalizeHist(th1)
+
+
+# YY = CLAHE.apply(Y)
+# HVV = CLAHE.apply(HV)
+# YE = cv2.equalizeHist(Y)
+# HVE = cv2.equalizeHist(HV)
 
 # Instead of showing a greyscale image of the luminance alone, merge the enhanced 
 # luminance with the original U and V values to form a full YUV image
@@ -58,21 +66,16 @@ Enchanced_HSV = cv2.merge((H,S,HVE))
 # Convert the new YUV image back to the original BGR colour space
 Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
 Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
-Enchanced_YUV_HSV = cv2.cvtColor(Enchanced_BGR_HSV, cv2.COLOR_BGR2YUV)
+
+_, th2 = cv2.threshold(Enchanced_BGR_HSV, 170, 255, cv2.THRESH_TRUNC)
 
 # Enchanced_YUV_B = Enchanced_BGR_YUV[:,:,0]
 # Enchanced_YUV_G = Enchanced_BGR_YUV[:,:,1]
 # Enchanced_YUV_R = Enchanced_BGR_YUV[:,:,2]
 
-Enchanced_HSV_B = Enchanced_BGR_HSV[:,:,0]
+# Enchanced_HSV_B = Enchanced_BGR_HSV[:,:,0]
 # Enchanced_HSV_G = Enchanced_BGR_HSV[:,:,1]
 # Enchanced_HSV_R = Enchanced_BGR_HSV[:,:,2]
-
-# finalhsv = cv2.fastNlMeansDenoisingColored(Enchanced_BGR_HSV,None,20,10,7,20)
-# finalyuv = cv2.fastNlMeansDenoisingColored(Enchanced_BGR_YUV,None,20,10,7,20)
-
-# Equalised_HVE = cv2.equalizeHist(HVE)
-# Equalised_YE = cv2.equalizeHist(YE)
 
 # BG = Enchanced_BGR[:,:,0]
 
@@ -82,16 +85,16 @@ Enchanced_HSV_B = Enchanced_BGR_HSV[:,:,0]
 
 # cv2.imshow("Enchanced_HSV_B", Enchanced_HSV_B)
 # cv2.imshow("Enchanced_HSV_G", Enchanced_HSV_G)
-# cv2.imshow("Enchanced ImageH", Enchanced_BGR_HSV)
+cv2.imshow("Enchanced ImageH", Enchanced_BGR_HSV)
+# cv2.imshow("Enchanced ImageY", Enchanced_BGR_YUV)
+cv2.imshow("th1", th1)
+cv2.imshow("th2", th2)
+cv2.imshow("th3", th3)
 # cv2.imshow("HV", HV)
 # cv2.imshow("Y", Y)
 # cv2.imshow("U", U)
-# cv2.imshow("final_image", final_image)
-# cv2.imshow("finalyuv", finalyuv)
-# cv2.imshow("HV2", HV2)
-# cv2.imshow("HVE", HVE)
 
-# key = cv2.waitKey(0)
+key = cv2.waitKey(0)
 
 
 
@@ -103,16 +106,16 @@ fig = plt.figure()
 gs = fig.add_gridspec(2, 2)
 
 ax1 = fig.add_subplot(gs[0,0])
-ax1.imshow(HV, cmap='gray')
+ax1.imshow(th1, cmap='gray')
 
 ax2 = fig.add_subplot(gs[0,1])
-ax2.hist(HV.ravel(), bins=256, range=[0,256])
+ax2.hist(th1.ravel(), bins=256, range=[0,256])
 
 ax3 = fig.add_subplot(gs[1,0])
-ax3.imshow(HVE, cmap='gray')
+ax3.imshow(th3, cmap='gray')
 
 ax4 = fig.add_subplot(gs[1,1])
-ax4.hist(HVE.ravel(), bins=256, range=[0,256])
+ax4.hist(th3.ravel(), bins=256, range=[0,256])
 
 # ax5 = fig.add_subplot(gs[2,0])
 # ax5.imshow(l_channel, cmap='gray')
