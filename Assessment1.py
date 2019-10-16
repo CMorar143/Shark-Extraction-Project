@@ -11,7 +11,7 @@ from matplotlib import image as image
 # Opening an image using a File Open dialog:
 # F = gui.fileopenbox()
 # I = cv2.imread(F)
-I = cv2.imread("Shark_2.PNG")
+I = cv2.imread("Shark_1.PNG")
 
 # Converting the colour space to YUV and extracting the Luminance (Y) From the image:
 YUV = cv2.cvtColor(I, cv2.COLOR_BGR2YUV)
@@ -38,9 +38,9 @@ YE = CLAHE.apply(Y)
 HVE = CLAHE.apply(HV)
 UE = CLAHE.apply(U) #--------------LOOKS GOOD FOR BOTH IN THRESHOLD(170,BIN_INV)
 
-HVE2 = cv2.equalizeHist(HV)
-YE2 = cv2.equalizeHist(Y)
-UE2 = cv2.equalizeHist(U)
+# HVE2 = cv2.equalizeHist(HV)
+# YE2 = cv2.equalizeHist(Y)
+# UE2 = cv2.equalizeHist(U)
 
 # _, th1Y = cv2.threshold(YE, 110, 255, cv2.THRESH_BINARY_INV)
 # th2Y = cv2.adaptiveThreshold(YE, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 3)
@@ -52,14 +52,7 @@ UE2 = cv2.equalizeHist(U)
 
 _, th1U = cv2.threshold(UE, 175, 255, cv2.THRESH_TRUNC)
 th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 275, 2)
-th3U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 275, 2)
-
-
-
-# YY = CLAHE.apply(Y)
-# HVV = CLAHE.apply(HV)
-# YE = cv2.equalizeHist(Y)
-# HVE = cv2.equalizeHist(HV)
+# th3U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 275, 2)
 
 # Instead of showing a greyscale image of the luminance alone, merge the enhanced 
 # luminance with the original U and V values to form a full YUV image
@@ -73,6 +66,12 @@ Enchanced_HSV = cv2.merge((H,S,HVE))
 # Convert the new YUV image back to the original BGR colour space
 Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
 Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
+# G = cv2.cvtColor(Enchanced_BGR_HSV, cv2.COLOR_BGR2GRAY)
+# G2 = cv2.cvtColor(Enchanced_BGR_YUV, cv2.COLOR_BGR2GRAY)
+mask = cv2.cvtColor(th2U, cv2.COLOR_GRAY2BGR)
+
+extracted_sharkYUV = cv2.bitwise_and(mask, Enchanced_BGR_YUV)
+extracted_sharkHSV = cv2.bitwise_and(mask, Enchanced_BGR_HSV)
 
 # Enchanced_YUV_B = Enchanced_BGR_YUV[:,:,0]
 # Enchanced_YUV_G = Enchanced_BGR_YUV[:,:,1]
@@ -98,9 +97,9 @@ Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
 # cv2.imshow("th2Y", th2Y)
 # cv2.imshow("th3Y", th3Y)
 
-cv2.imshow("th1U", th1U)
-cv2.imshow("th2U", th2U)
-cv2.imshow("th3U", th3U)
+# cv2.imshow("th1U", th1U)
+# cv2.imshow("th2U", th2U)
+# cv2.imshow("th3U", th3U)
 
 # cv2.imshow("th1H", th1H)
 # cv2.imshow("th2H", th2H)
@@ -110,6 +109,9 @@ cv2.imshow("th3U", th3U)
 # cv2.imshow("Y", Y)
 # cv2.imshow("U", U)
 
+cv2.imshow("extracted_sharkHSV", extracted_sharkHSV)
+cv2.imshow("extracted_sharkYUV", extracted_sharkYUV)
+
 key = cv2.waitKey(0)
 
 
@@ -118,26 +120,26 @@ key = cv2.waitKey(0)
 
 
 
-fig = plt.figure()
-gs = fig.add_gridspec(4, 2)
+# fig = plt.figure()
+# gs = fig.add_gridspec(4, 2)
 
-ax1 = fig.add_subplot(gs[0,0])
-ax1.imshow(U, cmap='gray')
+# ax1 = fig.add_subplot(gs[0,0])
+# ax1.imshow(U, cmap='gray')
 
-ax2 = fig.add_subplot(gs[0,1])
-ax2.hist(U.ravel(), bins=256, range=[0,256])
+# ax2 = fig.add_subplot(gs[0,1])
+# ax2.hist(U.ravel(), bins=256, range=[0,256])
 
-ax3 = fig.add_subplot(gs[1,0])
-ax3.imshow(UE, cmap='gray')
+# ax3 = fig.add_subplot(gs[1,0])
+# ax3.imshow(UE, cmap='gray')
 
-ax4 = fig.add_subplot(gs[1,1])
-ax4.hist(UE.ravel(), bins=256, range=[0,256])
+# ax4 = fig.add_subplot(gs[1,1])
+# ax4.hist(UE.ravel(), bins=256, range=[0,256])
 
-ax5 = fig.add_subplot(gs[2,0])
-ax5.imshow(UE2, cmap='gray')
+# ax5 = fig.add_subplot(gs[2,0])
+# ax5.imshow(UE2, cmap='gray')
 
-ax6 = fig.add_subplot(gs[2,1])
-ax6.hist(UE2.ravel(), bins=256, range=[0,256])
+# ax6 = fig.add_subplot(gs[2,1])
+# ax6.hist(UE2.ravel(), bins=256, range=[0,256])
 
 # ax7 = fig.add_subplot(gs[3,0])
 # ax7.imshow(, cmap='gray')
@@ -145,6 +147,6 @@ ax6.hist(UE2.ravel(), bins=256, range=[0,256])
 # ax8 = fig.add_subplot(gs[3,1])
 # ax8.hist(.ravel(), bins=256, range=[0,256])
 
-plt.show()
-cv2.waitKey(0)
-plt.close()
+# plt.show()
+# cv2.waitKey(0)
+# plt.close()
