@@ -1,3 +1,4 @@
+
 # import the necessary packages:
 import cv2
 import easygui as gui
@@ -40,7 +41,7 @@ UE = CLAHE.apply(U) #--------------LOOKS GOOD FOR BOTH IN THRESHOLD(170,BIN_INV)
 
 # HVE2 = cv2.equalizeHist(HV)
 # YE2 = cv2.equalizeHist(Y)
-# UE2 = cv2.equalizeHist(U)
+UE2 = cv2.equalizeHist(UE)
 
 # _, th1Y = cv2.threshold(YE, 110, 255, cv2.THRESH_BINARY_INV)
 # th2Y = cv2.adaptiveThreshold(YE, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 3)
@@ -50,9 +51,9 @@ UE = CLAHE.apply(U) #--------------LOOKS GOOD FOR BOTH IN THRESHOLD(170,BIN_INV)
 # th2H = cv2.adaptiveThreshold(HVE, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 15, 6)
 # th3H = cv2.adaptiveThreshold(HVE, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 6)
 
-_, th1U = cv2.threshold(UE, 175, 255, cv2.THRESH_TRUNC)
+_, th1U = cv2.threshold(UE, 176, 255, cv2.THRESH_TRUNC)
 th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 275, 2)
-# th3U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 275, 2)
+# th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 275, 5)
 
 # Instead of showing a greyscale image of the luminance alone, merge the enhanced 
 # luminance with the original U and V values to form a full YUV image
@@ -68,18 +69,30 @@ Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
 Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
 # G = cv2.cvtColor(Enchanced_BGR_HSV, cv2.COLOR_BGR2GRAY)
 # G2 = cv2.cvtColor(Enchanced_BGR_YUV, cv2.COLOR_BGR2GRAY)
-mask = cv2.cvtColor(th2U, cv2.COLOR_GRAY2BGR)
 
-extracted_sharkYUV = cv2.bitwise_and(mask, Enchanced_BGR_YUV)
-extracted_sharkHSV = cv2.bitwise_and(mask, Enchanced_BGR_HSV)
+# mask = cv2.cvtColor(th2U, cv2.COLOR_GRAY2BGR)
+# extracted_sharkYUV = cv2.bitwise_and(mask, Enchanced_BGR_YUV)
+# extracted_sharkHSV = cv2.bitwise_or(mask, Enchanced_BGR_HSV)
 
 # Enchanced_YUV_B = Enchanced_BGR_YUV[:,:,0]
 # Enchanced_YUV_G = Enchanced_BGR_YUV[:,:,1]
 # Enchanced_YUV_R = Enchanced_BGR_YUV[:,:,2]
 
-# Enchanced_HSV_B = Enchanced_BGR_HSV[:,:,0]
-# Enchanced_HSV_G = Enchanced_BGR_HSV[:,:,1]
-# Enchanced_HSV_R = Enchanced_BGR_HSV[:,:,2]
+# extracted_sharkB = cv2.bitwise_and(th2U, Enchanced_YUV_B)
+# extracted_sharkG = cv2.bitwise_and(th2U, Enchanced_YUV_G)
+# extracted_sharkR = cv2.bitwise_and(th2U, Enchanced_YUV_R)
+
+Enchanced_HSV_B = Enchanced_BGR_HSV[:,:,0]
+Enchanced_HSV_G = Enchanced_BGR_HSV[:,:,1]
+Enchanced_HSV_R = Enchanced_BGR_HSV[:,:,2]
+
+extracted_sharkB = cv2.bitwise_and(th2U, Enchanced_HSV_B)
+extracted_sharkG = cv2.bitwise_and(th2U, Enchanced_HSV_G)
+extracted_sharkR = cv2.bitwise_and(th2U, Enchanced_HSV_R)
+
+f = cv2.merge((extracted_sharkB, extracted_sharkG, extracted_sharkR))
+# extracted_sharkHSV = cv2.bitwise_and(mask, Enchanced_BGR_HSV)
+
 
 # BG = Enchanced_BGR[:,:,0]
 
@@ -109,8 +122,10 @@ extracted_sharkHSV = cv2.bitwise_and(mask, Enchanced_BGR_HSV)
 # cv2.imshow("Y", Y)
 # cv2.imshow("U", U)
 
-cv2.imshow("extracted_sharkHSV", extracted_sharkHSV)
-cv2.imshow("extracted_sharkYUV", extracted_sharkYUV)
+# cv2.imshow("extracted_sharkHSV", extracted_sharkHSV)
+# cv2.imshow("extracted_sharkYUV", extracted_sharkYUV)
+
+cv2.imshow("f", f)
 
 key = cv2.waitKey(0)
 
@@ -120,26 +135,26 @@ key = cv2.waitKey(0)
 
 
 
-# fig = plt.figure()
-# gs = fig.add_gridspec(4, 2)
+fig = plt.figure()
+gs = fig.add_gridspec(3, 2)
 
-# ax1 = fig.add_subplot(gs[0,0])
-# ax1.imshow(U, cmap='gray')
+ax1 = fig.add_subplot(gs[0,0])
+ax1.imshow(extracted_sharkB, cmap='gray')
 
-# ax2 = fig.add_subplot(gs[0,1])
-# ax2.hist(U.ravel(), bins=256, range=[0,256])
+ax2 = fig.add_subplot(gs[0,1])
+ax2.hist(extracted_sharkB.ravel(), bins=256, range=[0,256])
 
-# ax3 = fig.add_subplot(gs[1,0])
-# ax3.imshow(UE, cmap='gray')
+ax3 = fig.add_subplot(gs[1,0])
+ax3.imshow(extracted_sharkG, cmap='gray')
 
-# ax4 = fig.add_subplot(gs[1,1])
-# ax4.hist(UE.ravel(), bins=256, range=[0,256])
+ax4 = fig.add_subplot(gs[1,1])
+ax4.hist(extracted_sharkG.ravel(), bins=256, range=[0,256])
 
-# ax5 = fig.add_subplot(gs[2,0])
-# ax5.imshow(UE2, cmap='gray')
+ax5 = fig.add_subplot(gs[2,0])
+ax5.imshow(extracted_sharkR, cmap='gray')
 
-# ax6 = fig.add_subplot(gs[2,1])
-# ax6.hist(UE2.ravel(), bins=256, range=[0,256])
+ax6 = fig.add_subplot(gs[2,1])
+ax6.hist(extracted_sharkR.ravel(), bins=256, range=[0,256])
 
 # ax7 = fig.add_subplot(gs[3,0])
 # ax7.imshow(, cmap='gray')
@@ -147,6 +162,6 @@ key = cv2.waitKey(0)
 # ax8 = fig.add_subplot(gs[3,1])
 # ax8.hist(.ravel(), bins=256, range=[0,256])
 
-# plt.show()
-# cv2.waitKey(0)
-# plt.close()
+plt.show()
+cv2.waitKey(0)
+plt.close()
