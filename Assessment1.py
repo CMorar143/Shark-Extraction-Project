@@ -21,14 +21,11 @@ YUV = cv2.cvtColor(I, cv2.COLOR_BGR2YUV)
 HSV = cv2.cvtColor(I, cv2.COLOR_BGR2HSV)
 
 # Extract the Y, U, and V from the YUV image:
-Y = YUV[:,:,0]
-U = YUV[:,:,1]
-V = YUV[:,:,2]
+Y, U, V = cv2.split(YUV)
 
 H = HSV[:,:,0]
 S = HSV[:,:,1]
 HV = HSV[:,:,2]
-
 
 # Using the Contrast Limited Adaptive Histogram Equalization class to enhance the contrast
 # Create the CLAHE object and set the clip limit and tile grid size:
@@ -38,18 +35,6 @@ CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (3,3))
 YE = CLAHE.apply(Y)
 HVE = CLAHE.apply(HV)
 UE = CLAHE.apply(U) #--------------LOOKS GOOD FOR BOTH IN THRESHOLD(170,BIN_INV)
-
-# HVE2 = cv2.equalizeHist(HV)
-# YE2 = cv2.equalizeHist(Y)
-# UE2 = cv2.equalizeHist(UE)
-
-# _, th1Y = cv2.threshold(YE, 110, 255, cv2.THRESH_BINARY_INV)
-# th2Y = cv2.adaptiveThreshold(YE, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 25, 3)
-# th3Y = cv2.adaptiveThreshold(YE, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 25, 3)
-
-# _, th1H = cv2.threshold(HVE, 172, 255, cv2.THRESH_BINARY_INV)
-# th2H = cv2.adaptiveThreshold(HVE, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 15, 6)
-# th3H = cv2.adaptiveThreshold(HVE, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 6)
 
 _, th1U = cv2.threshold(UE, 176, 255, cv2.THRESH_TRUNC)
 th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 275, 2)
@@ -61,30 +46,19 @@ Enchanced_YUV = cv2.merge((YE,U,V))
 Enchanced_HSV = cv2.merge((H,S,HVE))
 
 
-# Convert the new YUV image back to the original BGR colour space
+# Convert the new YUV image back to the BGR colour space
 Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
 Enchanced_BGR_HSV = cv2.cvtColor(Enchanced_HSV, cv2.COLOR_HSV2BGR)
-# G = cv2.cvtColor(Enchanced_BGR_HSV, cv2.COLOR_BGR2GRAY)
-# G2 = cv2.cvtColor(Enchanced_BGR_YUV, cv2.COLOR_BGR2GRAY)
 
-# mask = cv2.cvtColor(th2U, cv2.COLOR_GRAY2BGR)
-# extracted_sharkYUV = cv2.bitwise_and(mask, Enchanced_BGR_YUV)
-# extracted_sharkHSV = cv2.bitwise_or(mask, Enchanced_BGR_HSV)
+# Extract the colour spaces
+Enchanced_YUV_B, Enchanced_YUV_G, Enchanced_YUV_R = cv2.split(Enchanced_BGR_YUV)
 
-Enchanced_YUV_B = Enchanced_BGR_YUV[:,:,0]
-Enchanced_YUV_G = Enchanced_BGR_YUV[:,:,1]
-Enchanced_YUV_R = Enchanced_BGR_YUV[:,:,2]
+# Extract the shark using the mask created by the thresholding above
 extracted_sharkB = cv2.bitwise_or(th2U, Enchanced_YUV_B)
 extracted_sharkG = cv2.bitwise_or(th2U, Enchanced_YUV_G)
 extracted_sharkR = cv2.bitwise_or(th2U, Enchanced_YUV_R)
 
-# Enchanced_HSV_B = Enchanced_BGR_HSV[:,:,0]
-# Enchanced_HSV_G = Enchanced_BGR_HSV[:,:,1]
-# Enchanced_HSV_R = Enchanced_BGR_HSV[:,:,2]
-# extracted_sharkB = cv2.bitwise_and(th2U, Enchanced_HSV_B)
-# extracted_sharkG = cv2.bitwise_and(th2U, Enchanced_HSV_G)
-# extracted_sharkR = cv2.bitwise_and(th2U, Enchanced_HSV_R)
-
+# Merge the channels
 f = cv2.merge((extracted_sharkB, extracted_sharkG, extracted_sharkR))
 YUV2 = cv2.cvtColor(f, cv2.COLOR_BGR2YUV)
 HSV2 = cv2.cvtColor(f, cv2.COLOR_BGR2HSV)
@@ -92,10 +66,6 @@ HSV2 = cv2.cvtColor(f, cv2.COLOR_BGR2HSV)
 y = YUV2[:,:,0]
 u = YUV2[:,:,1]
 v = YUV2[:,:,2]
-
-h = HSV2[:,:,0]
-s = HSV2[:,:,1]
-hv = HSV2[:,:,2]
 
 # ue = cv2.equalizeHist(u)
 ue = CLAHE.apply(u)
@@ -120,7 +90,7 @@ mask_u = cv2.bitwise_not(u)
 # cv2.imshow("th3Y", th3Y)
 
 # cv2.imshow("th1U", th1U)
-# cv2.imshow("th2U", th2U)
+cv2.imshow("th2U", th2U)
 # cv2.imshow("th3U", th3U)
 
 # cv2.imshow("th1H", th1H)
@@ -134,8 +104,7 @@ mask_u = cv2.bitwise_not(u)
 # cv2.imshow("extracted_sharkHSV", extracted_sharkHSV)
 # cv2.imshow("extracted_sharkYUV", extracted_sharkYUV)
 
-cv2.imshow("f", f)
-# cv2.imshow("masked_range", masked_range)
+# cv2.imshow("f", f)
 
 # key = cv2.waitKey(0)
 
@@ -149,15 +118,32 @@ print(maxVal)
 print(minLoc)
 print(maxLoc)
 
-range_lower = np.asarray([0])
 range_higher = np.asarray([(maxVal-3)])
-
 masked_range = cv2.inRange(u, 0, range_higher)
-masked_range = 255 - masked_range
+# masked_range = cv2.bitwise_not(masked_range)
 
-cv2.imshow("masked_range", masked_range)
+m = cv2.bitwise_xor(masked_range, th2U)
+m = cv2.bitwise_not(m)
+# cv2.imshow("m", m)
+# cv2.imshow("masked_range", masked_range)
 
-key = cv2.waitKey(0)
+# f2 = cv2.bitwise_and(m, th2U)
+
+# key = cv2.waitKey(0)
+
+# Extract the colour spaces
+Enchanced_YUV_B, Enchanced_YUV_G, Enchanced_YUV_R = cv2.split(Enchanced_BGR_YUV)
+
+# Extract the shark using the mask created by the thresholding above
+extracted_sharkB = cv2.bitwise_or(m, Enchanced_YUV_B)
+extracted_sharkG = cv2.bitwise_or(m, Enchanced_YUV_G)
+extracted_sharkR = cv2.bitwise_or(m, Enchanced_YUV_R)
+
+# Merge the channels
+f = cv2.merge((extracted_sharkB, extracted_sharkG, extracted_sharkR))
+
+cv2.imshow("f2", f)
+
 # ----------------------------------------------------------------------------------------------------
 
 
@@ -189,6 +175,6 @@ ax6.hist(ue.ravel(), bins=256, range=[0,256])
 # ax8 = fig.add_subplot(gs[3,1])
 # ax8.hist(mask_u.ravel(), bins=256, range=[0,256])
 
-plt.show()
+# plt.show()
 cv2.waitKey(0)
 plt.close()
