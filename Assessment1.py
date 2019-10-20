@@ -1,14 +1,9 @@
-
 # import the necessary packages:
 import cv2
 import easygui as gui
 
-# import the necessary packages:
-import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import image as image
-
-
+# Function to apply a threshold to an image.
+# It is used to remove the background
 def ApplyMask(threshold):
 	# Extract the shark using the mask created by the thresholding
 	extracted_sharkB = cv2.bitwise_or(threshold, Enchanced_YUV_B)
@@ -20,10 +15,13 @@ def ApplyMask(threshold):
 
 	return merged
 
+opening_message = "This Application Allows You to Extract a Shark From an Image.\n\n\n"
+instructions = "Please Choose The Image That You Would Like to Use."
+gui.msgbox(opening_message + instructions, "Hello!")
+
 # Opening an image using a File Open dialog:
 F = gui.fileopenbox()
 I = cv2.imread(F)
-# I = cv2.imread("Shark_2.PNG")
 
 # Converting the colour space to YUV and extracting the Luminance (Y) From the image:
 YUV = cv2.cvtColor(I, cv2.COLOR_BGR2YUV)
@@ -36,72 +34,46 @@ Y, U, V = cv2.split(YUV)
 CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (3,3))
 
 # Enchance contrast for the luminance (Y) channel in the image
+# This is done to improve definition in the image
 YE = CLAHE.apply(Y)
-# HVE = CLAHE.apply(HV)
-UE = CLAHE.apply(U) #--------------LOOKS GOOD FOR BOTH IN THRESHOLD(170,BIN_INV)
 
+# Enhance the contrast for the U channel
+# This is used to remove the background
+UE = CLAHE.apply(U)
+
+# use thresholding to create the mask
 _, th1U = cv2.threshold(UE, 176, 255, cv2.THRESH_TRUNC)
 th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 275, 2)
 
-# Instead of showing a greyscale image of the luminance alone, merge the enhanced 
-# luminance with the original U and V values to form a full YUV image
+# Merge the enhanced luminance with the original U and V values to form a full YUV image
 Enchanced_YUV = cv2.merge((YE,U,V))
-
 
 # Convert the new YUV image back to the BGR colour space
 Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
 
-# Extract the colour spaces
+# Extract the colour spaces in order to apply the mask to each channel
 Enchanced_YUV_B, Enchanced_YUV_G, Enchanced_YUV_R = cv2.split(Enchanced_BGR_YUV)
 
-# # Extract the shark using the mask created by the thresholding above
-# extracted_sharkB = cv2.bitwise_or(th2U, Enchanced_YUV_B)
-# extracted_sharkG = cv2.bitwise_or(th2U, Enchanced_YUV_G)
-# extracted_sharkR = cv2.bitwise_or(th2U, Enchanced_YUV_R)
-
-# # Merge the channels
-# f = cv2.merge((extracted_sharkB, extracted_sharkG, extracted_sharkR))
 f = ApplyMask(th2U)
 
 YUV2 = cv2.cvtColor(f, cv2.COLOR_BGR2YUV)
 
 u = YUV2[:,:,1]
 
-minVal = 0
-maxVal = 0
-minLoc = (0, 0)
-maxLoc = (0, 0)
+# Create another mask to remove more noise from the image
 minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(u)
 print(minVal)
 print(maxVal)
 print(minLoc)
 print(maxLoc)
 
-range_higher = np.asarray([(maxVal-3)])
-masked_range = cv2.inRange(u, 0, range_higher)
-
+masked_range = cv2.inRange(u, 0, maxVal-3)
 m = cv2.bitwise_xor(masked_range, th2U)
 m = cv2.bitwise_not(m)
 
-# key = cv2.waitKey(0)
+final_image = ApplyMask(m)
 
-
-# # Extract the colour spaces
-# Enchanced_YUV_B, Enchanced_YUV_G, Enchanced_YUV_R = cv2.split(Enchanced_BGR_YUV)
-
-# # Extract the shark using the mask created by the thresholding above
-# extracted_sharkB = cv2.bitwise_or(m, Enchanced_YUV_B)
-# extracted_sharkG = cv2.bitwise_or(m, Enchanced_YUV_G)
-# extracted_sharkR = cv2.bitwise_or(m, Enchanced_YUV_R)
-
-# # Merge the channels
-# f = cv2.merge((extracted_sharkB, extracted_sharkG, extracted_sharkR))
-
-# cv2.imshow("f2", f)
-
-img = ApplyMask(m)
-
-cv2.imshow("img", img)
+cv2.imshow("final_image", final_image)
 
 
 
