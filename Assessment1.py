@@ -15,65 +15,78 @@ def ApplyMask(threshold):
 
 	return merged
 
+# Messages for the Graphical User Interface
+closing_message = "\tHere's The Shark!\n\tWould You Like to Select Another Picture?"
+choices = ["Yes", "No"]
 opening_message = "This Application Allows You to Extract a Shark From an Image.\n\n\n"
 instructions = "Please Choose The Image That You Would Like to Use."
-gui.msgbox(opening_message + instructions, "Hello!")
 
-# Opening an image using a File Open dialog:
-F = gui.fileopenbox()
-I = cv2.imread(F)
+# Repeat until the user exits
+while 1:
+	# Introduction and instructions
+	gui.msgbox(opening_message + instructions, "Hello!")
 
-# Converting the colour space to YUV and extracting the Luminance (Y) From the image:
-YUV = cv2.cvtColor(I, cv2.COLOR_BGR2YUV)
+	# Opening an image using a File Open dialog:
+	F = gui.fileopenbox()
+	I = cv2.imread(F)
 
-# Extract the Y, U, and V from the YUV image:
-Y, U, V = cv2.split(YUV)
+	# Converting the colour space to YUV and extracting the Luminance (Y) From the image:
+	YUV = cv2.cvtColor(I, cv2.COLOR_BGR2YUV)
 
-# Using the Contrast Limited Adaptive Histogram Equalization class to enhance the contrast
-# Create the CLAHE object and set the clip limit and tile grid size:
-CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (3,3))
+	# Extract the Y, U, and V from the YUV image:
+	Y, U, V = cv2.split(YUV)
 
-# Enchance contrast for the luminance (Y) channel in the image
-# This is done to improve definition in the image
-YE = CLAHE.apply(Y)
+	# Using the Contrast Limited Adaptive Histogram Equalization class to enhance the contrast
+	# Create the CLAHE object and set the clip limit and tile grid size:
+	CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (3,3))
 
-# Enhance the contrast for the U channel
-# This is used to remove the background
-UE = CLAHE.apply(U)
+	# Enchance contrast for the luminance (Y) channel in the image
+	# This is done to improve definition in the image
+	YE = CLAHE.apply(Y)
 
-# use thresholding to create the mask
-_, th1U = cv2.threshold(UE, 176, 255, cv2.THRESH_TRUNC)
-th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 275, 2)
+	# Enhance the contrast for the U channel
+	# This is used to remove the background
+	UE = CLAHE.apply(U)
 
-# Merge the enhanced luminance with the original U and V values to form a full YUV image
-Enchanced_YUV = cv2.merge((YE,U,V))
+	# use thresholding to create the mask
+	_, th1U = cv2.threshold(UE, 176, 255, cv2.THRESH_TRUNC)
+	th2U = cv2.adaptiveThreshold(th1U, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 275, 2)
 
-# Convert the new YUV image back to the BGR colour space
-Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
+	# Merge the enhanced luminance with the original U and V values to form a full YUV image
+	Enchanced_YUV = cv2.merge((YE,U,V))
 
-# Extract the colour spaces in order to apply the mask to each channel
-Enchanced_YUV_B, Enchanced_YUV_G, Enchanced_YUV_R = cv2.split(Enchanced_BGR_YUV)
+	# Convert the new YUV image back to the BGR colour space
+	Enchanced_BGR_YUV = cv2.cvtColor(Enchanced_YUV, cv2.COLOR_YUV2BGR)
 
-f = ApplyMask(th2U)
+	# Extract the colour spaces in order to apply the mask to each channel
+	Enchanced_YUV_B, Enchanced_YUV_G, Enchanced_YUV_R = cv2.split(Enchanced_BGR_YUV)
 
-YUV2 = cv2.cvtColor(f, cv2.COLOR_BGR2YUV)
+	f = ApplyMask(th2U)
 
-u = YUV2[:,:,1]
+	YUV2 = cv2.cvtColor(f, cv2.COLOR_BGR2YUV)
 
-# Create another mask to remove more noise from the image
-minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(u)
-print(minVal)
-print(maxVal)
-print(minLoc)
-print(maxLoc)
+	u = YUV2[:,:,1]
 
-masked_range = cv2.inRange(u, 0, maxVal-3)
-m = cv2.bitwise_xor(masked_range, th2U)
-m = cv2.bitwise_not(m)
+	# Create another mask to remove more noise from the image
+	minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(u)
+	print(minVal)
+	print(maxVal)
+	print(minLoc)
+	print(maxLoc)
 
-final_image = ApplyMask(m)
+	masked_range = cv2.inRange(u, 0, maxVal-3)
+	m = cv2.bitwise_xor(masked_range, th2U)
+	m = cv2.bitwise_not(m)
 
-cv2.imshow("final_image", final_image)
+	final_image = ApplyMask(m)
+
+	cv2.imwrite("./final_image.png", final_image)
+
+	reply = gui.buttonbox(closing_message, image = "./final_image.png", choices = choices)
+
+	if reply == 'No':
+
+		exit(1)
 
 
 
