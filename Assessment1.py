@@ -1,7 +1,10 @@
+               ############## OPENING COMMENT ##############
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Program to Detect and Extract a Shark From an Image.						  #
 # Author: Cian Morar 														  #
 # Date: October 2019														  #
+# 																			  #
+# The algorithm for this program is outlined below:							  #
 # 																			  #
 # User selects an image. 													  #
 # 																			  #
@@ -9,7 +12,7 @@
 # 																			  #
 # Extract and enhance the contrast of the Y and U channels.					  #
 # 																			  #
-# Threshold the U channel to create a mask (for background subtraction).	  #
+# Threshold the U channel to create a mask (for background removal).		  #
 # 																			  #
 # Using the enhanced Y channel, convert YUV image back to BGR.				  #
 # 																			  #
@@ -17,9 +20,9 @@
 # 																			  #
 # Extract the U channel from the enhanced YUV image.					 	  #
 # 																			  #
-# Create another mask.														  #
+# Create another mask (to remove some additional noise from the image).		  #
 # 																			  #
-# Apply the final mask (to remove some noise from the image).				  #
+# Apply the final mask.	   			  										  #
 # 																			  #
 # Display the extracted shark.												  #
 # 																			  #
@@ -32,10 +35,10 @@ import easygui as gui
 
 # Messages for the Graphical User Interface:
 opening_message = "This Application Allows You to Extract a Shark From an Image.\n\n\n"
-instructions = "Please Choose The Image That You Would Like to Use."
+instructions = 	  "Please Choose The Image That You Would Like to Use."
 closing_message = "\tHere's The Shark!\n\tWould You Like to Select Another Picture?"
-choices = ["Yes", "No"]
-final_message = "\tHave a great day!"
+final_message =   "\tHave a great day!"
+choices = 		  ["Yes", "No"]
 
 # Function to apply a threshold to an image
 # It is used to remove the background:
@@ -50,21 +53,20 @@ def ApplyMask(threshold):
 	return merged
 
 # Repeat until the user chooses to exit:
-while 1:
+while (1):
 	gui.msgbox(opening_message + instructions, "Hello!")
 
 	F = gui.fileopenbox()
 	I = cv2.imread(F)
 
 	YUV = cv2.cvtColor(I, cv2.COLOR_BGR2YUV)
-
 	Y, U, V = cv2.split(YUV)
 
 	# Using the Contrast Limited Adaptive Histogram Equalization class to enhance the contrast
 	# Create the CLAHE object and set the clip limit and tile grid size:
 	CLAHE = cv2.createCLAHE(clipLimit = 4.5, tileGridSize = (3,3))
 
-	# This is done to improve definition in the image:
+	# This improves definition in the image:
 	Enhanced_Y = CLAHE.apply(Y)
 
 	# This is used to remove the background:
@@ -98,103 +100,28 @@ while 1:
 	# Close the application if they click no or if they try to close the window
 	if reply == 'No' or reply != 'Yes':
 		gui.msgbox(final_message, title = "Thanks!")
-		exit(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ----------------------------------------------------------------------------------------------------
-
-
-
-# fig = plt.figure()
-# gs = fig.add_gridspec(3, 2)
-
-# ax1 = fig.add_subplot(gs[0,0])
-# ax1.imshow(y, cmap='gray')
-
-# ax2 = fig.add_subplot(gs[0,1])
-# ax2.hist(y.ravel(), bins=256, range=[0,256])
-
-# ax3 = fig.add_subplot(gs[1,0])
-# ax3.imshow(u, cmap='gray')
-
-# ax4 = fig.add_subplot(gs[1,1])
-# ax4.hist(u.ravel(), bins=256, range=[0,256])
-
-# ax5 = fig.add_subplot(gs[2,0])
-# ax5.imshow(ue, cmap='gray')
-
-# ax6 = fig.add_subplot(gs[2,1])
-# ax6.hist(ue.ravel(), bins=256, range=[0,256])
-
-# ax7 = fig.add_subplot(gs[3,0])
-# ax7.imshow(mask_u, cmap='gray')
-
-# ax8 = fig.add_subplot(gs[3,1])
-# ax8.hist(mask_u.ravel(), bins=256, range=[0,256])
-
-# plt.show()
-cv2.waitKey(0)
-# plt.close()
+		exit(0)
+
+
+               ############## CLOSING COMMENT ##############
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Program to Detect and Extract a Shark From an Image.						  #
+# Author: Cian Morar 														  #
+# Date: October 2019														  #
+# 																			  #
+# This program does a fairly good job at generalising for both images.		  #
+# 																			  #
+# I tested all possible color channels and the Y channel provided the 		  #
+# most contrast and definition.					  							  #
+# 																			  #
+# the U channel proved to be the best for cleaning up noise.  				  #
+# 																			  #
+# However, it was difficult to remove the noise entirely.					  #
+# 																			  #
+# Regarding The performance of the algorithm:								  #
+# I ran the cProfile module with python to see how quickly it 				  #
+# was executing the program. The result was that there was 66943 function 	  #
+# calls in 0.268 seconds. This is regarded as well within a normal time	 	  #
+# for that many function calls												  #
+# 																			  #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
